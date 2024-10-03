@@ -270,38 +270,99 @@ function updateProgress(progressEvent) {
   }
 }
 /**
- * 7. As a final element of progress indication, add the following to your axios interceptors:
-
- */
-/**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
  * - The skeleton of this function has already been created for you.
  * - This function is used within Carousel.js to add the event listener as items are created.
  *  - This is why we use the export keyword for this function.
- * - Post to the cat API's favourites endpoint with the given ID.
+ * - .
  * - The API documentation gives examples of this functionality using fetch(); use Axios!
- * - Add additional logic to this function such that if the image is already favourited,
- *   you delete that favourite using the API, giving this function "toggle" functionality.
+
  * - You can call this function by clicking on the heart at the top right of any image.
  */
-window.favourite = function(imgId) {
-  // your code here
+window.favourite = async function(imgId) {
+  let favourites = await window.getFavourites()
+  console.log(favourites)
+  // * - Add additional logic to this function such that if the image is already favourited,
+  // *   you delete that favourite using the API, giving this function "toggle" functionality.
+  let match = favourites.find(favourite => favourite.image_id === imgId)
+  if(match){
+    await window.deleteFavourite(match.id)
+  } else{
+    await window.saveFavourite(imgId)
+  }
+
+}
+// * 9. Test your favourite() function by creating a getFavourites() function.
+// * - Use Axios to get all of your favourites from the cat API.
+window.getFavourites = async function(){
+  try {
+    const response = await axios.get(`https://api.thecatapi.com/v1/favourites/`, {
+      headers: {
+        'x-api-key': API_KEY
+      },
+    });
+    
+    console.log('Success getting favourites:', response.data);
+    return response.data
+  } catch (error) {
+    console.error('Error getting favourites:', error.response ? error.response.data : error.message);
+  }
+};
+
+
+window.saveFavourite = async function(imgId){
+  let rawBody = {
+    image_id: imgId
+  };
+  try {
+     let newFavourite = await axios.post(
+      'https://api.thecatapi.com/v1/favourites',
+      rawBody,
+      {
+        headers: {
+          'x-api-key': API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    console.log(newFavourite.data); 
+  } catch (error) {
+    console.error(error);
+  }
 }
 
+window.deleteFavourite = async function(imgId){
+  try {
+    const response = await axios.delete(`https://api.thecatapi.com/v1/favourites/${imgId}`, {
+      headers: {
+        'x-api-key': API_KEY,  
+      },
+    });
+    console.log('Favourite deleted:', response.data);
+  } catch (error) {
+    console.error('Error deleting favourite:', error.response ? error.response.data : error.message);
+  }
+};
 /**
- * 9. Test your favourite() function by creating a getFavourites() function.
- * - Use Axios to get all of your favourites from the cat API.
- * - Clear the carousel and display your favourites when the button is clicked.
- *  - You will have to bind this event listener to getFavouritesBtn yourself.
+
+
+
  *  - Hint: you already have all of the logic built for building a carousel.
  *    If that isn't in its own function, maybe it should be so you don't have to
  *    repeat yourself in this section.
  */
+// *  - You will have to bind this event listener to getFavouritesBtn yourself.
+getFavouritesBtn.addEventListener('click', async function(){
+  let favourites = await window.getFavourites();
+  // * - Clear the carousel and display your favourites when the button is clicked.
+  window.clear();
+  infoDump.innerHTML = ''
+  for(let favourite of favourites){
+      //  * - For each object in the response array, create a new element for the carousel.
+      let newClone = window.createCarouselItem(favourite.image.url, `${favourite.name} PhotoId ${favourite.image.id}`, favourite.image.id);
+      //  *  - Append each of these new elements to the carousel.
+      window.appendCarousel(newClone);
+  }
+  
 
-/**
- * 10. Test your site, thoroughly!
- * - What happens when you try to load the Malayan breed?
- *  - If this is working, good job! If not, look for the reason why and fix it!
- * - Test other breeds as well. Not every breed has the same data available, so
- *   your code should account for this.
- */
+})
