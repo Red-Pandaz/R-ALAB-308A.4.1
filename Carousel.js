@@ -47,7 +47,6 @@ window.start = function() {
 
     // Next button event
     $("#carouselExampleControls .carousel-control-next").off("click").on("click", function () {
-      console.log('next click');
       if (scrollPosition < carouselWidth - cardWidth * 4) {
         scrollPosition += cardWidth;
         carouselInner.animate({ scrollLeft: scrollPosition }, 600);
@@ -60,7 +59,6 @@ window.start = function() {
 
     // Previous button event
     $("#carouselExampleControls .carousel-control-prev").off("click").on("click", function () {
-      console.log('prev click');
       if (scrollPosition > 0) {
         scrollPosition -= cardWidth;
         carouselInner.animate({ scrollLeft: scrollPosition }, 600);
