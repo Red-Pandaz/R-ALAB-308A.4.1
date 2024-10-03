@@ -236,6 +236,8 @@ breedSelect.addEventListener('change', async function(e){
 
 // * 5. Add axios interceptors to log the time between request and response to the console.
 axios.interceptors.request.use(config => {
+  //  * - In your request interceptor, set the body element's cursor style to "progress."
+  document.body.style.cursor = 'progress';
   // * - In your request interceptor, set the width of the progressBar element to 0%.
   progressBar.style.width = '0%';
   config.metadata = { startTime: new Date() };
@@ -245,6 +247,8 @@ axios.interceptors.request.use(config => {
   return Promise.reject(error);
 });
 axios.interceptors.response.use(response => {
+  // * - In your response interceptor, remove the progress cursor style from the body element.
+  document.body.style.cursor = 'default';
   const endTime = new Date();
   const timeTaken = endTime - response.config.metadata.startTime;
   console.log(`Response received from ${response.config.url} at ${endTime} in ${timeTaken}ms`);
@@ -267,8 +271,7 @@ function updateProgress(progressEvent) {
 }
 /**
  * 7. As a final element of progress indication, add the following to your axios interceptors:
- * - In your request interceptor, set the body element's cursor style to "progress."
- * - In your response interceptor, remove the progress cursor style from the body element.
+
  */
 /**
  * 8. To practice posting data, we'll create a system to "favourite" certain images.
