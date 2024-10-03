@@ -134,34 +134,92 @@ async function initialAxiosLoad(){
   axios.defaults.headers.common['X-Auth-Token'] = API_KEY;
   axios.defaults.headers.common['Content-Type'] = 'application/json';
   
-  // Function to retrieve breeds
     try {
         const response = await axios.get('https://api.thecatapi.com/v1/breeds', {
-            withCredentials: true 
+            withCredentials: false
         });
         console.log(response.data); 
         return response.data; 
     } catch (error) {
         console.error(error); 
     }
-  // * - Create new <options> for each of these breeds, and append them to breedSelect.
     for(let breed of breeds){
       let breedOption = document.createElement('option')
-      // *  - Each option should have a value attribute equal to the id of the breed.
       breedOption.value = breed.id
-      //  *  - Each option should display text equal to the name of the breed.
       breedOption.innerText = breed.name
       breedSelect.append(breedOption)
     }
-await generateCarousel(breeds[0].id)
+await generateAxiosCarousel(breeds[0].id)
 //  * - Add a call to this function to the end of your initialLoad function above to create the initial carousel.
 window.start()
   
-
-
 }
 window.addEventListener('load', initialAxiosLoad)
 
+async function generateAxiosCarousel(id){
+    //  * - Each new selection should clear, re-populate, and restart the Carousel.
+  window.clear()
+  //  * - Retrieve information on the selected breed from the cat API using fetch().
+  let selectedBreedId = id
+  console.log(selectedBreedId)
+  let breeds = async () => {
+  axios.defaults.headers.common['X-Auth-Token'] = API_KEY;
+  axios.defaults.headers.common['Content-Type'] = 'application/json';
+    try {
+        const response = await axios.get('https://api.thecatapi.com/v1/breeds', {
+            withCredentials: false 
+        });
+        console.log(response.data); 
+        return response.data; 
+    } catch (error) {
+        console.error(error); 
+    }
+  }
+    for(let breed of breeds){
+      let breedOption = document.createElement('option')
+      breedOption.value = breed.id
+      breedOption.innerText = breed.name
+      breedSelect.append(breedOption)
+    }
+  let selectedBreed = breeds.find(breed => breed.id === selectedBreedId)
+  let selectedBreedImages = async () => {
+    axios.defaults.headers.common['X-Auth-Token'] = API_KEY;
+    axios.defaults.headers.common['Content-Type'] = 'application/json';
+      try {
+          const response = await axios.get(`https://api.thecatapi.com/v1/images/search?limit=100&breed_ids=${selectedBreedId}`, {
+              withCredentials: false 
+          });
+          console.log(response.data); 
+          return response.data; 
+      } catch (error) {
+          console.error(error); 
+      }
+    }
+  console.log(selectedBreedImages)
+  let n = 1
+  for(let selectedBreedImage of selectedBreedImages){
+    //  * - For each object in the response array, create a new element for the carousel.
+    let newClone = window.createCarouselItem(selectedBreedImage.url, `${selectedBreed.name} Photo# ${n}`, selectedBreedImage.id)
+    //  *  - Append each of these new elements to the carousel.
+    window.appendCarousel(newClone)
+    n++
+  }
+  //  * - Use the other data you have been given to create an informational section within the infoDump element.
+  let infoDump = document.querySelector('#infoDump')
+  infoDump.innerHTML = `
+    <h3>${selectedBreed.name}</h3>
+    <h5>${selectedBreed.description}</h5>
+    <ul>
+      <li>Country of Origin: ${selectedBreed.origin}</li>
+      <li>Temperament: ${selectedBreed.temperament}</li>
+      <li>Lifespan: ${selectedBreed.life_span}</li>
+      <li>Child-Friendly Score: ${selectedBreed.child_friendly}</li>
+      <li>Dog-Friendly Score: ${selectedBreed.dog_friendly}</li>
+      <li>Stranger-Friendly Score: ${selectedBreed.stranger_friendly}</li>
+      <li><a href=${selectedBreed.wikipedia}>Wikipedia</a></li>
+    </ul
+  `
+}
 
 
 
